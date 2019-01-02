@@ -9,7 +9,8 @@ function huichun( keys )
             GameRules:GetGameModeEntity().gem_castle_hp = 100
         end
         GameRules:GetGameModeEntity().gem_castle:SetHealth(GameRules:GetGameModeEntity().gem_castle_hp)
-        CustomNetTables:SetTableValue( "game_state", "gem_life", { gem_life = GameRules:GetGameModeEntity().gem_castle_hp } );
+        CustomNetTables:SetTableValue( "game_state", "gem_life", { gem_life = GameRules:GetGameModeEntity().gem_castle_hp, p = PlayerResource:GetPlayerCount() } );
+
         AMHC:CreateNumberEffect(caster,hp_count,5,AMHC.MSG_MISS,"green",0)
         EmitSoundOn("DOTAMusic_Stinger.004",caster)
 
@@ -56,7 +57,7 @@ function tanlan( keys )
 
 	--给玩家团队金钱
 	AMHC:CreateNumberEffect(caster,exp_count,5,AMHC.MSG_GOLD,"yellow",0)
-	GameRules.team_gold = GameRules.team_gold + exp_count
+	GameRules:GetGameModeEntity().team_gold = GameRules:GetGameModeEntity().team_gold + exp_count
 
 	if exp_count >= 80 then
 		EmitGlobalSound("General.CoinsBig")
@@ -70,10 +71,10 @@ function tanlan( keys )
 		if ( PlayerResource:IsValidPlayer( ii ) ) then
 			local player = PlayerResource:GetPlayer(ii)
 			if player ~= nil then
-				PlayerResource:SetGold(ii, GameRules.team_gold, true)
+				PlayerResource:SetGold(ii, GameRules:GetGameModeEntity().team_gold, true)
 			end
 		end
 	end
-	CustomNetTables:SetTableValue( "game_state", "gem_team_gold", { gold = GameRules.team_gold } );
+	CustomNetTables:SetTableValue( "game_state", "gem_team_gold", { gold = GameRules:GetGameModeEntity().team_gold } );
 
 end

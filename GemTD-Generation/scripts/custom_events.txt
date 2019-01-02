@@ -49,5 +49,30 @@
 	{
 		"money"					"short"
 	}
+	"use_extend"
+	{
+		"player_id"				"short"
+	}
+	"mima"
+	{
+		"text"		"string"
+	}
+	"show_use_extend"
+	{
+		"player_id"				"short"
+	}
+	"show_use_bush_ticket"
+	{
+		"player_id"				"short"
+	}
+	"show_words"
+	{
+		"name"			"string"
+		"expire"		"short"
+	}
+	"prt_localize"
+	{
+		"text"			"string"
+	}
 }
 

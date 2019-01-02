@@ -3,11 +3,12 @@ function DuoChongGongJi( keys )
  
         local caster = keys.caster
         local target = keys.target
+        local attack_range = caster:Script_GetAttackRange()
 
         --只对远程有效
         if caster:IsRangedAttacker() then
                 --获取攻击范围
-                local radius = caster:GetAttackRange()
+                local radius = attack_range
                 local teams = DOTA_UNIT_TARGET_TEAM_ENEMY
                 local types = DOTA_UNIT_TARGET_BASIC+DOTA_UNIT_TARGET_HERO+DOTA_UNIT_TARGET_BUILDING
                 local flags = DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES+DOTA_UNIT_TARGET_FLAG_NONE
@@ -74,13 +75,14 @@ end
 
 --多重箭函数
 function DuoChongGongJi_you( keys )
- 
         local caster = keys.caster
         local target = keys.target
---只对远程有效
+        local attack_range = caster:Script_GetAttackRange()
+        
+        --只对远程有效
         if caster:IsRangedAttacker() then
                 --获取攻击范围
-                local radius = caster:GetAttackRange()
+                local radius = attack_range--caster:GetAttackRange()
                 local teams = DOTA_UNIT_TARGET_TEAM_ENEMY
                 local types = DOTA_UNIT_TARGET_BASIC+DOTA_UNIT_TARGET_HERO+DOTA_UNIT_TARGET_BUILDING
                 local flags = DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES+DOTA_UNIT_TARGET_FLAG_NONE
@@ -95,7 +97,7 @@ function DuoChongGongJi_you( keys )
         --筛选离英雄最近的敌人
                 for i,unit in pairs(group) do
                         if (#attack_unit)==attack_count then
-                                break
+                            break
                         end
  
                         if unit~=target then
@@ -155,9 +157,10 @@ function gemtd_hero_lianjie (keys)
                               DOTA_UNIT_TARGET_FLAG_NONE,
                               FIND_FARTHEST,
                               false)
+
     local unluckydog = nil
     for i,v in pairs (direUnits) do
-        if v.player == caster:GetPlayerID() then
+        if v.player == nil or v.player == caster:GetPlayerID() then
             unluckydog = v
             break
         end
@@ -169,26 +172,36 @@ function gemtd_hero_lianjie (keys)
         return
     end
 
-    -- GameRules:SendCustomMessage('lianjie:'..table.maxn(direUnits)..' '..unluckydog:GetUnitName(),0,0)
+    -- local info =
+    -- {
+    --     Target = unluckydog,
+    --     Source = keys.target,
+    --     Ability = nil,
+    --     EffectName = "particles/units/heroes/hero_warlock/warlock_fatal_bonds_base.vpcf",
+    --     bDodgeable = false,
+    --     iMoveSpeed = 3000,
+    --     bProvidesVision = false,
+    --     iVisionRadius = 0,
+    --     iVisionTeamNumber = keys.target:GetTeamNumber(),
+    --     iSourceAttachment = DOTA_PROJECTILE_ATTACHMENT_ATTACK_1
+    -- }
+    -- projectile = ProjectileManager:CreateTrackingProjectile(info)
 
-    local info =
-    {
-        Target = unluckydog,
-        Source = keys.target,
-        Ability = nil,
-        EffectName = "particles/units/heroes/hero_warlock/warlock_fatal_bonds_base.vpcf",
-        bDodgeable = false,
-        iMoveSpeed = 3000,
-        bProvidesVision = false,
-        iVisionRadius = 0,
-        iVisionTeamNumber = keys.target:GetTeamNumber(),
-        iSourceAttachment = DOTA_PROJECTILE_ATTACHMENT_ATTACK_1
-    }
-    projectile = ProjectileManager:CreateTrackingProjectile(info)
+    local p = ParticleManager:CreateParticle("particles/units/heroes/hero_warlock/warlock_fatal_bonds_base.vpcf",PATTACH_CUSTOMORIGIN,keys.target)
+    ParticleManager:SetParticleControlEnt(p,0,keys.target,5,"attach_hitloc",keys.target:GetOrigin(),true)
+    ParticleManager:SetParticleControlEnt(p,1,unluckydog,5,"attach_hitloc",unluckydog:GetOrigin(),true)
+    Timers:CreateTimer(0.5,function()
+        ParticleManager:DestroyParticle(p,true)
+    end)
 
     local ability_level = caster:FindAbilityByName('gemtd_hero_lianjie'):GetLevel()
 
     damage = damage * (ability_level*0.1 + 0.6)
+
+    local distance = (attacker:GetAbsOrigin() - unluckydog:GetAbsOrigin()):Length2D()
+    local beishu = math.floor(distance/400)*0.1 + 1
+
+    damage = damage*beishu
 
     --获取攻击伤害
     local damageTable = {
